@@ -141,3 +141,37 @@ class BacktestResponse(BaseModel):
 
     status: str = Field(default="success", description="Response status")
     result: BacktestResult = Field(..., description="Backtest result")
+
+
+class StrategyComparison(BaseModel):
+    """Individual strategy configuration for comparison."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    name: str = Field(..., description="Strategy name for display")
+    type: str = Field(..., description="Strategy type (e.g., 'rsi', 'macd')")
+    params: Dict[str, Any] = Field(default_factory=dict, description="Strategy parameters")
+
+
+class ComparisonRequest(BaseModel):
+    """Request to compare multiple strategies."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    ticker: str = Field(default="SPY", description="Ticker symbol")
+    strategies: List[StrategyComparison] = Field(..., min_length=2, max_length=10, description="Strategies to compare (2-10)")
+    start_date: Optional[datetime] = Field(default=None, description="Backtest start date")
+    end_date: Optional[datetime] = Field(default=None, description="Backtest end date")
+    initial_capital: float = Field(default=100000.0, gt=0, description="Initial capital for all strategies")
+    commission: float = Field(default=1.0, ge=0, description="Commission per trade")
+
+
+class ComparisonResponse(BaseModel):
+    """Response with multi-strategy comparison results."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    status: str = Field(default="success", description="Response status")
+    results: List[Dict[str, Any]] = Field(..., description="Individual backtest results for each strategy")
+    rankings: Dict[str, List[str]] = Field(..., description="Rankings by metric")
+    correlations: Dict[str, float] = Field(..., description="Pairwise equity curve correlations")

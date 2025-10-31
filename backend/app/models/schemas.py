@@ -12,13 +12,16 @@ class StrategyBase(BaseModel):
 
     name: str = Field(..., min_length=1, max_length=255, description="Strategy name")
     description: Optional[str] = Field(None, description="Strategy description")
-    config: Dict[str, Any] = Field(..., description="Strategy configuration")
+    strategy_type: str = Field(..., min_length=1, max_length=100, description="Strategy type (e.g., 'rsi', 'macd')")
+    config: Dict[str, Any] = Field(..., description="Strategy configuration parameters")
+    tags: Optional[List[str]] = Field(None, description="Tags for categorization")
+    is_favorite: bool = Field(default=False, description="Whether this strategy is marked as favorite")
 
 
 class StrategyCreate(StrategyBase):
     """Schema for creating a strategy."""
 
-    pass
+    is_template: bool = Field(default=False, description="Whether this is a template strategy")
 
 
 class StrategyUpdate(BaseModel):
@@ -27,6 +30,8 @@ class StrategyUpdate(BaseModel):
     name: Optional[str] = Field(None, min_length=1, max_length=255)
     description: Optional[str] = None
     config: Optional[Dict[str, Any]] = None
+    tags: Optional[List[str]] = None
+    is_favorite: Optional[bool] = None
 
 
 class Strategy(StrategyBase):
@@ -35,6 +40,8 @@ class Strategy(StrategyBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
+    is_template: bool
+    version: int
     created_at: datetime
     updated_at: datetime
 

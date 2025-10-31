@@ -44,8 +44,20 @@ class Strategy(Base):
     name = Column(String(255), nullable=False, index=True)
     description = Column(Text, nullable=True)
 
+    # Strategy type (e.g., "rsi", "macd", "sma_crossover")
+    strategy_type = Column(String(100), nullable=False, index=True)
+
     # Strategy configuration stored as JSON
+    # Example: {"period": 14, "oversold": 30, "overbought": 70}
     config = Column(JSON, nullable=False)
+
+    # Organization and categorization
+    tags = Column(JSON, nullable=True)  # List of tags: ["momentum", "mean-reversion"]
+    is_favorite = Column(Boolean, default=False, nullable=False, index=True)
+    is_template = Column(Boolean, default=False, nullable=False)  # Built-in vs custom
+
+    # Version tracking (for future use)
+    version = Column(Integer, default=1, nullable=False)
 
     # Timestamps
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
@@ -56,7 +68,7 @@ class Strategy(Base):
 
     def __repr__(self) -> str:
         """String representation."""
-        return f"<Strategy(id={self.id}, name='{self.name}')>"
+        return f"<Strategy(id={self.id}, name='{self.name}', type='{self.strategy_type}')>"
 
 
 class Backtest(Base):
