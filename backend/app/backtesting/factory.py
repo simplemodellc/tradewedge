@@ -2,7 +2,15 @@
 
 from typing import Any, Dict, Type
 
-from .strategy import BaseStrategy, BuyAndHoldStrategy, SMACrossoverStrategy
+from .strategy import (
+    BaseStrategy,
+    BuyAndHoldStrategy,
+    SMACrossoverStrategy,
+    RSIStrategy,
+    MACDStrategy,
+    BollingerBandsStrategy,
+    MeanReversionStrategy,
+)
 
 
 class StrategyFactory:
@@ -13,6 +21,11 @@ class StrategyFactory:
         "buy_and_hold": BuyAndHoldStrategy,
         "sma_crossover": SMACrossoverStrategy,
         "sma_cross": SMACrossoverStrategy,
+        "rsi": RSIStrategy,
+        "macd": MACDStrategy,
+        "bollinger_bands": BollingerBandsStrategy,
+        "bollinger": BollingerBandsStrategy,
+        "mean_reversion": MeanReversionStrategy,
     }
 
     @classmethod
