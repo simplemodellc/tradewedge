@@ -179,7 +179,3 @@ class MarketDataDownloader:
         """
         logger.info(f"Refreshing {self.ticker} data...")
         return self.download(force_refresh=True)
-
-
-# Backwards compatibility alias
-VTSAXDownloader = MarketDataDownloader
