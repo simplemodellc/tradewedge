@@ -16,19 +16,20 @@ logger = logging.getLogger(__name__)
 settings = get_settings()
 
 
-class VTSAXDownloader:
-    """Downloads and caches VTSAX historical data."""
+class MarketDataDownloader:
+    """Downloads and caches historical market data for any ticker."""
 
-    def __init__(self, cache_dir: Optional[Path] = None):
+    def __init__(self, ticker: str, cache_dir: Optional[Path] = None):
         """
         Initialize downloader.
 
         Args:
+            ticker: Ticker symbol (e.g., 'SPY', 'VTSAX')
             cache_dir: Directory for cached data files
         """
+        self.ticker = ticker.upper()
         self.cache_dir = cache_dir or settings.data_cache_dir
         self.cache_dir.mkdir(parents=True, exist_ok=True)
-        self.ticker = settings.vtsax_ticker
         self.validator = DataValidator()
 
     def _get_cache_path(self) -> Path:
@@ -176,5 +177,9 @@ class VTSAXDownloader:
         Returns:
             Updated DataFrame
         """
-        logger.info("Refreshing VTSAX data...")
+        logger.info(f"Refreshing {self.ticker} data...")
         return self.download(force_refresh=True)
+
+
+# Backwards compatibility alias
+VTSAXDownloader = MarketDataDownloader

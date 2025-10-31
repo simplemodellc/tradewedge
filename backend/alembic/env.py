@@ -11,7 +11,7 @@ from alembic import context
 sys.path.append(str(Path(__file__).parent.parent))
 
 from app.database import Base
-from app.models.database import Strategy, Backtest  # noqa: F401
+from app.models.database import Ticker, Strategy, Backtest  # noqa: F401
 from app.config import get_settings
 
 # this is the Alembic Config object, which provides

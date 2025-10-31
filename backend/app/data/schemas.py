@@ -52,7 +52,7 @@ class MarketDataSummary(BaseModel):
 class DataDownloadRequest(BaseModel):
     """Request to download historical data."""
 
-    ticker: str = "VTSAX"
+    ticker: str = "SPY"
     start_date: Optional[datetime] = None
     end_date: Optional[datetime] = None
     force_refresh: bool = False

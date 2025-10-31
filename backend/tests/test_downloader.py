@@ -1,4 +1,4 @@
-"""Tests for VTSAX data downloader."""
+"""Tests for market data downloader."""
 
 from datetime import datetime
 from pathlib import Path
@@ -7,16 +7,21 @@ from unittest.mock import Mock, patch
 import pandas as pd
 import pytest
 
-from app.data.downloader import VTSAXDownloader
+from app.data.downloader import MarketDataDownloader
 
 
-class TestVTSAXDownloader:
-    """Test suite for VTSAXDownloader."""
+class TestMarketDataDownloader:
+    """Test suite for MarketDataDownloader."""
 
     @pytest.fixture
     def downloader(self, test_settings, tmp_path):
         """Create downloader instance with test settings."""
-        return VTSAXDownloader(cache_dir=tmp_path / "cache")
+        return MarketDataDownloader(ticker="VTSAX", cache_dir=tmp_path / "cache")
+
+    @pytest.fixture
+    def spy_downloader(self, test_settings, tmp_path):
+        """Create SPY downloader instance for testing."""
+        return MarketDataDownloader(ticker="SPY", cache_dir=tmp_path / "cache")
 
     def test_init(self, downloader, tmp_path):
         """Test downloader initialization."""
@@ -30,6 +35,13 @@ class TestVTSAXDownloader:
 
         assert cache_path.name == "vtsax_historical.parquet"
         assert cache_path.parent == downloader.cache_dir
+
+    def test_get_cache_path_spy(self, spy_downloader):
+        """Test cache path generation for SPY."""
+        cache_path = spy_downloader._get_cache_path()
+
+        assert cache_path.name == "spy_historical.parquet"
+        assert cache_path.parent == spy_downloader.cache_dir
 
     def test_save_and_load_cache(self, downloader, sample_ohlcv_data):
         """Test saving and loading data from cache."""

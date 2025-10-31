@@ -3,10 +3,36 @@
 from datetime import datetime
 from typing import Optional
 
-from sqlalchemy import JSON, Column, DateTime, Float, Integer, String, Text, ForeignKey
+from sqlalchemy import JSON, Column, DateTime, Float, Integer, String, Text, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 
 from app.database import Base
+
+
+class Ticker(Base):
+    """Ticker/Symbol model for tracking available securities."""
+
+    __tablename__ = "tickers"
+
+    id = Column(Integer, primary_key=True, index=True)
+    symbol = Column(String(20), nullable=False, unique=True, index=True)
+    name = Column(String(255), nullable=False)
+    asset_type = Column(String(50), nullable=False)  # ETF, Stock, Index, etc.
+    description = Column(Text, nullable=True)
+
+    # Data tracking
+    is_active = Column(Boolean, default=True, nullable=False)
+    last_updated = Column(DateTime, nullable=True)
+    total_records = Column(Integer, default=0, nullable=False)
+    data_quality_score = Column(Float, nullable=True)
+
+    # Timestamps
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    def __repr__(self) -> str:
+        """String representation."""
+        return f"<Ticker(symbol='{self.symbol}', name='{self.name}', type='{self.asset_type}')>"
 
 
 class Strategy(Base):

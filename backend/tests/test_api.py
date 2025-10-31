@@ -19,19 +19,20 @@ def client():
 @pytest.fixture
 def mock_downloader(sample_ohlcv_data):
     """Create mock downloader with sample data."""
-    with patch("app.routers.data.VTSAXDownloader") as mock:
+    with patch("app.routers.data.MarketDataDownloader") as mock:
         instance = Mock()
+        instance.ticker = "SPY"  # Default ticker
         instance.download.return_value = sample_ohlcv_data
         instance.refresh_data.return_value = sample_ohlcv_data
         instance.get_summary.return_value = Mock(
-            ticker="VTSAX",
+            ticker="SPY",
             start_date=datetime(2023, 1, 1),
             end_date=datetime(2023, 1, 31),
             total_records=len(sample_ohlcv_data),
             missing_dates=0,
             data_quality_score=100.0,
             model_dump=lambda mode=None: {
-                "ticker": "VTSAX",
+                "ticker": "SPY",
                 "start_date": "2023-01-01T00:00:00",
                 "end_date": "2023-01-31T00:00:00",
                 "total_records": len(sample_ohlcv_data),
@@ -78,14 +79,14 @@ class TestDataEndpoints:
 
         assert response.status_code == 200
         data = response.json()
-        assert data["ticker"] == "VTSAX"
+        assert data["ticker"] == "SPY"  # Default ticker is now SPY
         assert data["total_records"] > 0
         assert "data_quality_score" in data
 
     def test_download_data(self, client, mock_downloader):
         """Test download data endpoint."""
         request_data = {
-            "ticker": "VTSAX",
+            "ticker": "SPY",
             "start_date": "2023-01-01T00:00:00",
             "end_date": "2023-01-31T23:59:59",
             "force_refresh": False,
@@ -97,11 +98,11 @@ class TestDataEndpoints:
         data = response.json()
         assert data["status"] == "success"
         assert "summary" in data
-        assert data["summary"]["ticker"] == "VTSAX"
+        assert data["summary"]["ticker"] == "SPY"
 
     def test_download_data_minimal(self, client, mock_downloader):
         """Test download data with minimal parameters."""
-        response = client.post("/api/v1/data/download", json={"ticker": "VTSAX"})
+        response = client.post("/api/v1/data/download", json={"ticker": "SPY"})
 
         assert response.status_code == 200
         data = response.json()
@@ -203,14 +204,14 @@ class TestErrorHandling:
         data = response.json()
         assert data["status"] == "success"
 
-    @patch("app.routers.data.VTSAXDownloader")
+    @patch("app.routers.data.MarketDataDownloader")
     def test_download_data_exception(self, mock_downloader, client):
         """Test download data when exception occurs."""
         instance = Mock()
         instance.download.side_effect = Exception("Download failed")
         mock_downloader.return_value = instance
 
-        response = client.post("/api/v1/data/download", json={"ticker": "VTSAX"})
+        response = client.post("/api/v1/data/download", json={"ticker": "SPY"})
 
         assert response.status_code == 500
         data = response.json()

@@ -39,7 +39,7 @@ class Settings(BaseSettings):
 
     # Data
     data_cache_dir: Path = Path("./data/market_data")
-    vtsax_ticker: str = "VTSAX"
+    default_ticker: str = "SPY"  # Default ticker for API when not specified
 
     # Logging
     log_level: str = "INFO"

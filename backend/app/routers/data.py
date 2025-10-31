@@ -7,24 +7,32 @@ from typing import Optional
 from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import JSONResponse
 
-from app.data.downloader import VTSAXDownloader
+from app.config import get_settings
+from app.data.downloader import MarketDataDownloader
 from app.data.schemas import DataDownloadRequest, MarketDataSummary
 
 logger = logging.getLogger(__name__)
+settings = get_settings()
 
 router = APIRouter(prefix="/data", tags=["data"])
 
 
 @router.get("/summary", response_model=MarketDataSummary)
-async def get_data_summary() -> MarketDataSummary:
+async def get_data_summary(
+    ticker: str = Query(default=None, description="Ticker symbol (e.g., SPY, VTSAX)")
+) -> MarketDataSummary:
     """
-    Get summary statistics for VTSAX historical data.
+    Get summary statistics for historical data.
+
+    Args:
+        ticker: Ticker symbol (defaults to SPY if not specified)
 
     Returns:
         MarketDataSummary with statistics
     """
     try:
-        downloader = VTSAXDownloader()
+        symbol = ticker or settings.default_ticker
+        downloader = MarketDataDownloader(ticker=symbol)
         summary = downloader.get_summary()
         return summary
     except Exception as e:
@@ -35,16 +43,16 @@ async def get_data_summary() -> MarketDataSummary:
 @router.post("/download")
 async def download_data(request: DataDownloadRequest) -> JSONResponse:
     """
-    Download VTSAX historical data.
+    Download historical data for a ticker.
 
     Args:
-        request: Download request parameters
+        request: Download request parameters (includes ticker)
 
     Returns:
         JSON response with download status
     """
     try:
-        downloader = VTSAXDownloader()
+        downloader = MarketDataDownloader(ticker=request.ticker)
         df = downloader.download(
             start_date=request.start_date,
             end_date=request.end_date,
@@ -56,7 +64,7 @@ async def download_data(request: DataDownloadRequest) -> JSONResponse:
         return JSONResponse(
             content={
                 "status": "success",
-                "message": f"Downloaded {len(df)} records",
+                "message": f"Downloaded {len(df)} records for {request.ticker}",
                 "summary": summary.model_dump(mode="json"),
             }
         )
@@ -66,15 +74,21 @@ async def download_data(request: DataDownloadRequest) -> JSONResponse:
 
 
 @router.post("/refresh")
-async def refresh_data() -> JSONResponse:
+async def refresh_data(
+    ticker: str = Query(default=None, description="Ticker symbol to refresh")
+) -> JSONResponse:
     """
-    Refresh cached VTSAX data with latest available data.
+    Refresh cached data with latest available data.
+
+    Args:
+        ticker: Ticker symbol (defaults to SPY if not specified)
 
     Returns:
         JSON response with refresh status
     """
     try:
-        downloader = VTSAXDownloader()
+        symbol = ticker or settings.default_ticker
+        downloader = MarketDataDownloader(ticker=symbol)
         df = downloader.refresh_data()
 
         summary = downloader.get_summary(df)
@@ -82,7 +96,7 @@ async def refresh_data() -> JSONResponse:
         return JSONResponse(
             content={
                 "status": "success",
-                "message": f"Refreshed data with {len(df)} records",
+                "message": f"Refreshed {symbol} data with {len(df)} records",
                 "summary": summary.model_dump(mode="json"),
             }
         )
@@ -93,14 +107,16 @@ async def refresh_data() -> JSONResponse:
 
 @router.get("/historical")
 async def get_historical_data(
+    ticker: Optional[str] = Query(None, description="Ticker symbol"),
     start_date: Optional[datetime] = Query(None, description="Start date for data"),
     end_date: Optional[datetime] = Query(None, description="End date for data"),
     limit: Optional[int] = Query(None, ge=1, le=10000, description="Limit number of records"),
 ) -> JSONResponse:
     """
-    Get historical VTSAX data.
+    Get historical data for a ticker.
 
     Args:
+        ticker: Ticker symbol (defaults to SPY if not specified)
         start_date: Start date filter
         end_date: End date filter
         limit: Maximum number of records to return
@@ -109,7 +125,8 @@ async def get_historical_data(
         JSON response with historical data
     """
     try:
-        downloader = VTSAXDownloader()
+        symbol = ticker or settings.default_ticker
+        downloader = MarketDataDownloader(ticker=symbol)
         df = downloader.download(start_date=start_date, end_date=end_date)
 
         if limit:
