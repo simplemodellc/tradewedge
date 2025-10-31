@@ -9,6 +9,8 @@ const navigation = [
   { name: 'Data Explorer', href: '/data' },
   { name: 'Indicators', href: '/indicators' },
   { name: 'Backtest', href: '/backtest' },
+  { name: 'Library', href: '/library' },
+  { name: 'Compare', href: '/compare' },
 ]
 
 /**
