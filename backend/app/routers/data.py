@@ -115,8 +115,10 @@ async def get_historical_data(
         if limit:
             df = df.tail(limit)
 
-        # Convert to records format
-        data = df.reset_index().to_dict(orient="records")
+        # Convert to records format with date as ISO string
+        df_copy = df.reset_index()
+        df_copy["Date"] = df_copy["Date"].dt.strftime("%Y-%m-%dT%H:%M:%S")
+        data = df_copy.to_dict(orient="records")
 
         return JSONResponse(content={"status": "success", "data": data, "count": len(data)})
     except Exception as e:
