@@ -395,6 +395,21 @@ TradeWedge is a comprehensive backtesting platform for trading strategies (SPY, 
 
 **Note:** Advanced features (optimization, strategy builder UI, advanced metrics) deferred to future iterations to keep this focused on core strategy implementation.
 
+**Testing:** 21 comprehensive tests added for new strategies
+- TestRSIStrategy: 4 tests (signal generation, custom parameters, edge cases)
+- TestMACDStrategy: 4 tests (crossover signals, parameters, validation)
+- TestBollingerBandsStrategy: 4 tests (mean reversion, boundaries, edge cases)
+- TestMeanReversionStrategy: 4 tests (Z-score signals, thresholds, edge cases)
+- TestNewStrategyFactory: 5 tests (creation, registration, listing of all 6 strategies)
+- All tests passing with realistic market data fixtures
+- Backtesting module coverage: 91% (strategy.py), 96% (engine.py), 94% (factory.py)
+
+**Files Modified:**
+- `backend/app/backtesting/strategy.py` (+413 lines)
+- `backend/app/backtesting/factory.py` (updated)
+- `backend/app/backtesting/__init__.py` (added exports)
+- `backend/tests/test_backtesting.py` (+341 lines, 21 new tests)
+
 ---
 
 ### ⏳ Iteration 9: Strategy Management & Comparison
@@ -537,13 +552,16 @@ TradeWedge is a comprehensive backtesting platform for trading strategies (SPY, 
 
 ---
 
-## Current Statistics (As of Iteration 4)
+## Current Statistics (As of Iteration 8)
 
 ### Code Metrics
-- **Total Tests**: 112 (100% passing)
-- **Code Coverage**: 85%
-- **Backend Statements**: ~1,173
-- **Frontend (so far)**: ~530 lines (types, API client, hooks)
+- **Total Tests**: 133 (100% passing)
+- **Code Coverage**: 85% overall
+  - Backtesting: 91% (strategy.py), 96% (engine.py), 94% (factory.py)
+  - Data Pipeline: 98% (validator.py), 82% (downloader.py)
+  - Studies/Indicators: 100% (all indicator modules)
+- **Backend Statements**: ~1,313
+- **Frontend**: ~2,000+ lines (types, API client, hooks, components, pages)
 
 ### Data Metrics
 - **SPY Records**: 6,497 daily bars (99.21% quality)
@@ -559,8 +577,9 @@ TradeWedge is a comprehensive backtesting platform for trading strategies (SPY, 
 - **Total**: 10 functional endpoints
 
 ### Indicators & Strategies
-- **Technical Indicators**: 21
-- **Trading Strategies**: 2 (with framework for unlimited)
+- **Technical Indicators**: 21 (across 4 categories: Trend, Momentum, Volatility, Volume)
+- **Trading Strategies**: 6 (Buy & Hold, SMA Crossover, RSI, MACD, Bollinger Bands, Mean Reversion)
+- **Strategy Framework**: Extensible BaseStrategy pattern for unlimited custom strategies
 
 ---
 
@@ -617,7 +636,7 @@ tradewedge/
 │   │   │   └── schemas.py             # Schemas
 │   │   ├── backtesting/               # Backtesting engine
 │   │   │   ├── engine.py              # Backtesting engine
-│   │   │   ├── strategy.py            # Base + 2 strategies
+│   │   │   ├── strategy.py            # Base + 6 strategies
 │   │   │   ├── factory.py             # Strategy factory
 │   │   │   └── schemas.py             # Schemas
 │   │   ├── models/                    # Database models
@@ -627,15 +646,15 @@ tradewedge/
 │   │       ├── data.py                # Data endpoints (4)
 │   │       ├── indicators.py          # Indicator endpoints (2)
 │   │       └── backtesting.py         # Backtest endpoints (2)
-│   ├── tests/                         # 112 tests
+│   ├── tests/                         # 133 tests (100% passing)
 │   │   ├── conftest.py                # Shared fixtures
 │   │   ├── test_api.py                # API tests (15)
 │   │   ├── test_downloader.py         # Downloader tests (12)
 │   │   ├── test_validator.py          # Validator tests (13)
 │   │   ├── test_indicators.py         # Indicator tests (30)
 │   │   ├── test_indicators_api.py     # Indicator API tests (14)
-│   │   ├── test_backtesting.py        # Backtest tests (14)
-│   │   └── test_backtesting_api.py    # Backtest API tests (14)
+│   │   ├── test_backtesting.py        # Backtest tests (38 - includes 21 new strategy tests)
+│   │   └── test_backtesting_api.py    # Backtest API tests (11)
 │   ├── alembic/                       # Database migrations
 │   │   └── versions/                  # 3 migrations
 │   ├── scripts/
@@ -691,7 +710,7 @@ uvicorn app.main:app --reload
 cd backend
 pytest -v --cov=app
 
-# All 112 tests passing, 85% coverage
+# All 133 tests passing, 85% coverage
 ```
 
 ### Frontend (After Completion)
@@ -707,13 +726,14 @@ npm run dev
 ## Summary
 
 **COMPLETED: 8 / 10 Iterations (80%)**
-- ✅ Backend is production-ready (112 tests, 85% coverage, 21 indicators, 6 strategies)
+- ✅ Backend is production-ready (133 tests, 85% coverage, 21 indicators, 6 strategies)
 - ✅ Frontend foundation complete (layout, theme, navigation, types, API client)
 - ✅ Core UI pages functional (Dashboard, Data Explorer, Indicators, Backtesting)
 - ✅ UI component library built (Button, Input, Select, Card, Label)
 - ✅ Charts with Lightweight Charts (price/volume) and Recharts (equity curve)
 - ✅ Backtesting UI with metrics cards, equity curve, and trade history
-- ✅ 6 trading strategies: Buy & Hold, SMA Crossover, RSI, MACD, Bollinger Bands, Mean Reversion
+- ✅ 6 trading strategies with comprehensive test coverage (21 new tests added)
+- ✅ All 133 tests passing with 85% overall coverage
 - ⏳ Remaining work is polish, optimization features, and deployment
 
 **NEXT PRIORITY: Iteration 9-10 - Polish & Deployment**
