@@ -267,44 +267,68 @@ TradeWedge is a comprehensive backtesting platform for trading strategies (SPY, 
 
 ---
 
-### ⏳ Iteration 7: Backtesting UI
-**Status:** NOT STARTED
+### ✅ Iteration 7: Backtesting UI
+**Status:** COMPLETED
 
-**Planned Components:**
+**Components:**
 
 **1. Backtest Configuration Page**
-- Strategy selector with descriptions
-- Dynamic parameter inputs (based on selected strategy)
-- Ticker selector
-- Date range picker (with presets: 1Y, 3Y, 5Y, All Time)
-- Capital & commission configuration
-- Position sizing settings
-- Validation and error handling
+- Strategy selector with all available strategies
+- Dynamic parameter form (auto-generates based on selected strategy)
+- Ticker symbol input with validation
+- Date range picker with manual inputs
+- Date range presets (1Y, 3Y, 5Y, 10Y, Max buttons)
+- Initial capital input (default $100,000)
+- Commission per trade input (default $1.00)
+- Parameter validation with min/max ranges
+- Run backtest button with loading state
+- Strategy browser showing all available strategies
+- Error handling with descriptive messages
 
-**2. Backtest Results Page**
-- Performance metrics dashboard:
-  - Total return, annual return, Sharpe ratio
-  - Max drawdown, win rate
-  - Total trades, avg win/loss, profit factor
-- Equity curve chart (Recharts)
-- Price chart with buy/sell signals (Lightweight Charts)
-- Trade history table with filters
-- Position list with P&L details
-- Export results (CSV, JSON, PDF)
+**2. MetricsCards Component**
+- 8 performance metric cards in responsive grid:
+  - Total Return ($ and %)
+  - Annual Return (annualized %)
+  - Sharpe Ratio (with quality rating)
+  - Max Drawdown ($ and %)
+  - Win Rate (% with win/loss count)
+  - Total Trades count
+  - Average Win/Loss per trade
+  - Profit Factor (with profitability indicator)
+- Color-coded values (green for positive, red for negative)
+- Currency and percentage formatting
+- Responsive grid layout (4 columns on large screens)
 
-**3. Components**
-- MetricsCard component
-- EquityCurveChart component
-- TradeHistoryTable component
-- SignalsChart component
+**3. EquityCurveChart Component**
+- Recharts line chart for equity visualization
+- Dual Y-axis (left: equity in $, right: drawdown %)
+- Equity line (primary color)
+- Drawdown line (red)
+- Custom tooltip with formatted values
+- Date formatting on X-axis
+- Responsive container (400px height)
+- Theme-aware colors
 
-**Estimated Time:** 15-20 hours
+**4. TradeHistoryTable Component**
+- Scrollable table with sticky header (max 500px height)
+- 8 columns: Entry Date, Exit Date, Shares, Entry/Exit Price, P&L, Return %, Commission
+- Currency and percentage formatting
+- Color-coded P&L (green for profit, red for loss)
+- Monospace font for numbers
+- Hover effects on rows
+- Empty state when no trades
 
-**Files to Create:**
-- `frontend/src/app/backtest/page.tsx`
-- `frontend/src/app/backtest/[id]/page.tsx`
-- `frontend/src/components/backtest/*`
-- `frontend/src/components/metrics/*`
+**Testing:**
+- Full integration with backend backtesting API
+- React Query for data fetching and caching
+- Loading states during backtest execution
+- Responsive design verified
+
+**Files Created:**
+- `frontend/src/app/backtest/page.tsx` (functional backtest page - 352 lines)
+- `frontend/src/components/backtest/metrics-cards.tsx`
+- `frontend/src/components/backtest/equity-curve-chart.tsx`
+- `frontend/src/components/backtest/trade-history-table.tsx`
 
 ---
 
@@ -669,21 +693,22 @@ npm run dev
 
 ## Summary
 
-**COMPLETED: 6 / 10 Iterations (60%)**
-- ✅ Backend is production-ready (112 tests, 85% coverage)
+**COMPLETED: 7 / 10 Iterations (70%)**
+- ✅ Backend is production-ready (112 tests, 85% coverage, 21 indicators, 2 strategies)
 - ✅ Frontend foundation complete (layout, theme, navigation, types, API client)
-- ✅ Core UI pages functional (Data Explorer, Indicators, Dashboard)
+- ✅ Core UI pages functional (Dashboard, Data Explorer, Indicators, Backtesting)
 - ✅ UI component library built (Button, Input, Select, Card, Label)
-- ✅ Price charts with Lightweight Charts integration
-- ⏳ Remaining work is backtesting UI and advanced features
+- ✅ Charts with Lightweight Charts (price/volume) and Recharts (equity curve)
+- ✅ Backtesting UI with metrics cards, equity curve, and trade history
+- ⏳ Remaining work is additional strategies and polish
 
-**NEXT PRIORITY: Iteration 7 - Backtesting UI**
-- Build backtest configuration page with strategy selector
-- Create backtest results dashboard with performance metrics
-- Add equity curve and trade signals visualization
-- Estimated: 15-20 hours of development
+**NEXT PRIORITY: Iteration 8 - Additional Strategies & Advanced Features**
+- Add 5-7 more trading strategies (RSI, MACD, Bollinger Bands, etc.)
+- Implement strategy optimization features
+- Add advanced performance metrics
+- Estimated: 20-25 hours of development
 
-**Total Estimated Time to Completion:** 45-65 hours remaining
+**Total Estimated Time to Completion:** 35-50 hours remaining
 
 ---
 
