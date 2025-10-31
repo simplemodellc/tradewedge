@@ -15,6 +15,13 @@ import type {
   BacktestRequest,
   BacktestResponse,
   StrategiesListResponse,
+  Strategy,
+  StrategyCreateRequest,
+  StrategyUpdateRequest,
+  StrategyListResponse,
+  StrategyListFilters,
+  ComparisonRequest,
+  ComparisonResponse,
 } from '@/types/api';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -123,6 +130,61 @@ class APIClient {
 
   async runBacktest(request: BacktestRequest): Promise<BacktestResponse> {
     const response = await this.client.post('/api/v1/backtesting/run', request);
+    return response.data;
+  }
+
+  // ============================================================================
+  // Strategy Management
+  // ============================================================================
+
+  async listStrategies(filters?: StrategyListFilters): Promise<StrategyListResponse> {
+    const params = new URLSearchParams();
+
+    if (filters?.skip !== undefined) params.append('skip', filters.skip.toString());
+    if (filters?.limit !== undefined) params.append('limit', filters.limit.toString());
+    if (filters?.favorite_only) params.append('favorite_only', 'true');
+    if (filters?.template_only) params.append('template_only', 'true');
+    if (filters?.strategy_type) params.append('strategy_type', filters.strategy_type);
+    if (filters?.tags) {
+      filters.tags.forEach(tag => params.append('tags', tag));
+    }
+
+    const response = await this.client.get(
+      `/api/v1/strategies/?${params.toString()}`
+    );
+    return response.data;
+  }
+
+  async getStrategy(id: number): Promise<Strategy> {
+    const response = await this.client.get(`/api/v1/strategies/${id}`);
+    return response.data;
+  }
+
+  async createStrategy(request: StrategyCreateRequest): Promise<Strategy> {
+    const response = await this.client.post('/api/v1/strategies/', request);
+    return response.data;
+  }
+
+  async updateStrategy(id: number, request: StrategyUpdateRequest): Promise<Strategy> {
+    const response = await this.client.patch(`/api/v1/strategies/${id}`, request);
+    return response.data;
+  }
+
+  async deleteStrategy(id: number): Promise<void> {
+    await this.client.delete(`/api/v1/strategies/${id}`);
+  }
+
+  async toggleFavorite(id: number): Promise<Strategy> {
+    const response = await this.client.post(`/api/v1/strategies/${id}/favorite`);
+    return response.data;
+  }
+
+  // ============================================================================
+  // Strategy Comparison
+  // ============================================================================
+
+  async compareStrategies(request: ComparisonRequest): Promise<ComparisonResponse> {
+    const response = await this.client.post('/api/v1/backtesting/compare', request);
     return response.data;
   }
 }

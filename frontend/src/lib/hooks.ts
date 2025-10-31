@@ -14,6 +14,13 @@ import type {
   BacktestRequest,
   BacktestResponse,
   StrategiesListResponse,
+  Strategy,
+  StrategyCreateRequest,
+  StrategyUpdateRequest,
+  StrategyListResponse,
+  StrategyListFilters,
+  ComparisonRequest,
+  ComparisonResponse,
 } from '@/types/api';
 
 // ============================================================================
@@ -32,6 +39,13 @@ export const queryKeys = {
     list: ['strategies', 'list'] as const,
   },
   backtest: (request: BacktestRequest) => ['backtest', request] as const,
+  savedStrategies: {
+    all: ['saved-strategies'] as const,
+    lists: () => ['saved-strategies', 'list'] as const,
+    list: (filters?: StrategyListFilters) => ['saved-strategies', 'list', filters] as const,
+    detail: (id: number) => ['saved-strategies', 'detail', id] as const,
+  },
+  comparison: (request: ComparisonRequest) => ['comparison', request] as const,
 };
 
 // ============================================================================
@@ -154,6 +168,112 @@ export function useRunBacktest(
 ) {
   return useMutation({
     mutationFn: (request: BacktestRequest) => apiClient.runBacktest(request),
+    ...options,
+  });
+}
+
+// ============================================================================
+// Strategy Management Hooks
+// ============================================================================
+
+export function useSavedStrategies(
+  filters?: StrategyListFilters,
+  options?: UseQueryOptions<StrategyListResponse, Error>
+) {
+  return useQuery({
+    queryKey: queryKeys.savedStrategies.list(filters),
+    queryFn: () => apiClient.listStrategies(filters),
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    ...options,
+  });
+}
+
+export function useSavedStrategy(
+  id: number,
+  options?: UseQueryOptions<Strategy, Error>
+) {
+  return useQuery({
+    queryKey: queryKeys.savedStrategies.detail(id),
+    queryFn: () => apiClient.getStrategy(id),
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    enabled: id > 0,
+    ...options,
+  });
+}
+
+export function useCreateStrategy(
+  options?: UseMutationOptions<Strategy, Error, StrategyCreateRequest>
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (request: StrategyCreateRequest) => apiClient.createStrategy(request),
+    onSuccess: () => {
+      // Invalidate all strategy lists
+      queryClient.invalidateQueries({ queryKey: queryKeys.savedStrategies.lists() });
+    },
+    ...options,
+  });
+}
+
+export function useUpdateStrategy(
+  options?: UseMutationOptions<Strategy, Error, { id: number; data: StrategyUpdateRequest }>
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: number; data: StrategyUpdateRequest }) =>
+      apiClient.updateStrategy(id, data),
+    onSuccess: (data) => {
+      // Invalidate specific strategy and lists
+      queryClient.invalidateQueries({ queryKey: queryKeys.savedStrategies.detail(data.id) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.savedStrategies.lists() });
+    },
+    ...options,
+  });
+}
+
+export function useDeleteStrategy(
+  options?: UseMutationOptions<void, Error, number>
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: number) => apiClient.deleteStrategy(id),
+    onSuccess: (_, id) => {
+      // Remove from cache and invalidate lists
+      queryClient.removeQueries({ queryKey: queryKeys.savedStrategies.detail(id) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.savedStrategies.lists() });
+    },
+    ...options,
+  });
+}
+
+export function useToggleFavorite(
+  options?: UseMutationOptions<Strategy, Error, number>
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: number) => apiClient.toggleFavorite(id),
+    onSuccess: (data) => {
+      // Update specific strategy and invalidate lists
+      queryClient.setQueryData(queryKeys.savedStrategies.detail(data.id), data);
+      queryClient.invalidateQueries({ queryKey: queryKeys.savedStrategies.lists() });
+    },
+    ...options,
+  });
+}
+
+// ============================================================================
+// Comparison Hooks
+// ============================================================================
+
+export function useCompareStrategies(
+  options?: UseMutationOptions<ComparisonResponse, Error, ComparisonRequest>
+) {
+  return useMutation({
+    mutationFn: (request: ComparisonRequest) => apiClient.compareStrategies(request),
     ...options,
   });
 }

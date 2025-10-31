@@ -210,3 +210,86 @@ export interface StrategiesListResponse {
   strategies: StrategyMetadata[];
   count: number;
 }
+
+// ============================================================================
+// Strategy Management Types
+// ============================================================================
+
+export interface Strategy {
+  id: number;
+  name: string;
+  description?: string;
+  strategy_type: string;
+  config: Record<string, any>;
+  tags?: string[];
+  is_favorite: boolean;
+  is_template: boolean;
+  version: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface StrategyCreateRequest {
+  name: string;
+  description?: string;
+  strategy_type: string;
+  config: Record<string, any>;
+  tags?: string[];
+  is_favorite?: boolean;
+  is_template?: boolean;
+}
+
+export interface StrategyUpdateRequest {
+  name?: string;
+  description?: string;
+  config?: Record<string, any>;
+  tags?: string[];
+  is_favorite?: boolean;
+}
+
+export interface StrategyListResponse {
+  strategies: Strategy[];
+  total: number;
+}
+
+export interface StrategyListFilters {
+  skip?: number;
+  limit?: number;
+  favorite_only?: boolean;
+  template_only?: boolean;
+  strategy_type?: string;
+  tags?: string[];
+}
+
+// ============================================================================
+// Comparison Types
+// ============================================================================
+
+export interface StrategyComparisonConfig {
+  name: string;
+  type: string;
+  params: Record<string, any>;
+}
+
+export interface ComparisonRequest {
+  ticker: string;
+  strategies: StrategyComparisonConfig[];
+  start_date?: string;
+  end_date?: string;
+  initial_capital?: number;
+  commission?: number;
+}
+
+export interface ComparisonStrategyResult {
+  strategy_name: string;
+  metrics: PerformanceMetrics;
+  equity_curve: EquityCurvePoint[];
+  trades: Position[];
+}
+
+export interface ComparisonResponse {
+  status: string;
+  results: ComparisonStrategyResult[];
+  rankings: Record<string, string[]>; // metric name -> ranked strategy names
+  correlations: Record<string, number>; // "strategy1_vs_strategy2" -> correlation value
+}

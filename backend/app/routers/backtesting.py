@@ -5,6 +5,8 @@ import logging
 from fastapi import APIRouter, HTTPException
 
 from app.backtesting import BacktestEngine, BacktestRequest, BacktestResponse, StrategyFactory
+from app.backtesting.comparison import StrategyComparison
+from app.backtesting.schemas import ComparisonRequest, ComparisonResponse
 from app.data.downloader import MarketDataDownloader
 
 logger = logging.getLogger(__name__)
@@ -93,4 +95,71 @@ async def run_backtest(request: BacktestRequest) -> BacktestResponse:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         logger.error(f"Error running backtest: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/compare", response_model=ComparisonResponse)
+async def compare_strategies(request: ComparisonRequest) -> ComparisonResponse:
+    """
+    Compare multiple trading strategies on the same dataset.
+
+    Args:
+        request: ComparisonRequest with strategies to compare and configuration
+
+    Returns:
+        ComparisonResponse with individual results, rankings, and correlations
+    """
+    try:
+        # Validate strategy count
+        if len(request.strategies) < 2:
+            raise HTTPException(
+                status_code=400,
+                detail="At least 2 strategies required for comparison"
+            )
+
+        if len(request.strategies) > 10:
+            raise HTTPException(
+                status_code=400,
+                detail="Maximum 10 strategies allowed for comparison"
+            )
+
+        # Convert strategy configs to dict format for comparison engine
+        strategies_config = [
+            {
+                "name": s.name,
+                "type": s.type,
+                "params": s.params,
+            }
+            for s in request.strategies
+        ]
+
+        # Create comparison engine and run comparison
+        comparison_engine = StrategyComparison()
+        result = comparison_engine.compare_strategies(
+            strategies=strategies_config,
+            ticker=request.ticker,
+            start_date=request.start_date,
+            end_date=request.end_date,
+            initial_capital=request.initial_capital,
+            commission=request.commission,
+        )
+
+        # Convert result to response format
+        result_dict = result.to_dict()
+
+        return ComparisonResponse(
+            status="success",
+            results=result_dict["results"],
+            rankings=result_dict["rankings"],
+            correlations=result_dict["correlations"],
+        )
+
+    except HTTPException:
+        # Re-raise HTTPException as-is
+        raise
+    except ValueError as e:
+        logger.error(f"Validation error: {str(e)}")
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Error comparing strategies: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
