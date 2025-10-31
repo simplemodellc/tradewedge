@@ -63,8 +63,8 @@ tradewedge/
 
 The project is being built iteratively with testing at each step:
 
-1. ✅ Project Setup & Data Foundation
-2. ⏳ Backend Core API
+1. ✅ **Project Setup & Data Foundation** - Complete VTSAX data pipeline with validation
+2. ✅ **Backend Core API** - Database models, migrations, and REST endpoints
 3. ⏳ Core Indicators Library
 4. ⏳ Backtesting Engine Core
 5. ⏳ Advanced Metrics & Complete Indicators
@@ -73,6 +73,23 @@ The project is being built iteratively with testing at each step:
 8. ⏳ Results Visualization
 9. ⏳ Strategy Management & Comparison
 10. ⏳ Polish & Production Ready
+
+### Current Status
+
+**Completed:**
+- ✅ VTSAX data downloader with yfinance integration (6,277+ records)
+- ✅ Data validation and quality scoring (97.65/100)
+- ✅ Parquet caching for efficient storage
+- ✅ FastAPI backend with CORS and configuration
+- ✅ SQLAlchemy ORM with Alembic migrations
+- ✅ Strategy and Backtest database models
+- ✅ RESTful API endpoints for data management
+- ✅ Comprehensive test suite (39 tests, 67% coverage)
+- ✅ Organized data persistence structure
+
+**Next Up:**
+- Core technical indicators library (SMA, EMA, RSI, MACD, Bollinger Bands, etc.)
+- Backtesting engine with buy/sell simulation
 
 ## Getting Started
 
@@ -89,8 +106,23 @@ cd backend
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
+
+# Copy environment configuration
+cp .env.example .env
+
+# Run database migrations
+alembic upgrade head
+
+# Start the API server
 uvicorn app.main:app --reload
 ```
+
+The backend will create a `data/` directory for persistent storage:
+- `data/database/` - SQLite database (strategies, backtests)
+- `data/market_data/` - VTSAX historical data cache
+- `data/logs/` - Application logs
+
+See [DATA_STRUCTURE.md](backend/DATA_STRUCTURE.md) for details.
 
 ### Frontend Setup
 
@@ -98,6 +130,29 @@ uvicorn app.main:app --reload
 cd frontend
 npm install
 npm run dev
+```
+
+## Data Persistence
+
+All application data is stored locally in `backend/data/` (excluded from git):
+
+- **Historical Market Data**: Downloaded once and cached locally in Parquet format
+- **Incremental Updates**: API endpoints refresh only new data as needed
+- **Database**: SQLite stores strategies and backtest results
+- **Backup**: Simply copy the `data/` directory to backup all application data
+
+### Initial Data Download
+
+On first API call, VTSAX data is automatically downloaded (~6,277 records from 2000):
+```bash
+curl http://localhost:8000/api/v1/data/summary
+```
+
+### Refresh Data
+
+To update with latest market data:
+```bash
+curl -X POST http://localhost:8000/api/v1/data/refresh
 ```
 
 ## Testing

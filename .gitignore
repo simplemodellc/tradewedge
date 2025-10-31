@@ -55,8 +55,11 @@ yarn-error.log*
 *.swo
 *~
 
-# Project specific
-backend/data/cached_data/
+# Project specific - Data directory (persistent local storage)
+backend/data/
+!backend/data/.gitkeep
+
+# Legacy locations (in case they exist)
 backend/*.db
 backend/*.sqlite
 backend/alembic/versions/*.pyc

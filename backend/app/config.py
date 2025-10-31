@@ -35,10 +35,10 @@ class Settings(BaseSettings):
         return [origin.strip() for origin in self.cors_origins.split(",")]
 
     # Database
-    database_url: str = "sqlite:///./tradewedge.db"
+    database_url: str = "sqlite:///./data/database/tradewedge.db"
 
     # Data
-    data_cache_dir: Path = Path("./data/cached_data")
+    data_cache_dir: Path = Path("./data/market_data")
     vtsax_ticker: str = "VTSAX"
 
     # Logging
@@ -47,7 +47,12 @@ class Settings(BaseSettings):
     def __init__(self, **kwargs):  # type: ignore
         """Initialize settings and ensure directories exist."""
         super().__init__(**kwargs)
+        # Create data directories
         self.data_cache_dir.mkdir(parents=True, exist_ok=True)
+        # Create database directory
+        Path("./data/database").mkdir(parents=True, exist_ok=True)
+        # Create logs directory for future use
+        Path("./data/logs").mkdir(parents=True, exist_ok=True)
 
 
 @lru_cache()
