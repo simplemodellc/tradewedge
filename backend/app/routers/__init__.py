@@ -1,5 +1,5 @@
 """API route handlers."""
 
-from . import data, indicators
+from . import backtesting, data, indicators
 
-__all__ = ["data", "indicators"]
+__all__ = ["data", "indicators", "backtesting"]

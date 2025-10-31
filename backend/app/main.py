@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
 from app.database import init_db
-from app.routers import data, indicators
+from app.routers import backtesting, data, indicators
 
 settings = get_settings()
 
@@ -53,6 +53,7 @@ app.add_middleware(
 # Include routers
 app.include_router(data.router, prefix=settings.api_v1_prefix)
 app.include_router(indicators.router, prefix=settings.api_v1_prefix)
+app.include_router(backtesting.router, prefix=settings.api_v1_prefix)
 
 
 @app.get("/health")
